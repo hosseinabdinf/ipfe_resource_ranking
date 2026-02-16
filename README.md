@@ -1,2 +1,2 @@
-# ipfe_resource_ranking
+# ASRR-IPFE
 A Simple Resource Ranking using Inner-Product Functional Encryption
