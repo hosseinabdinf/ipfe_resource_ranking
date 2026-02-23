@@ -77,10 +77,8 @@ scores_plain = np.dot(x, weights_scaled_int)
 ranking_plain = np.argsort(-scores_plain)  # descending
 plain_time = time.time() - start
 print_log(f"Ranking Plain: {ranking_plain}")
-
 top_plain = ranking_plain[0]
 print_log(f"Plain Scores: {scores_plain}")
-print(f"Plaintext top offer: {top_plain}, time: {plain_time:.4f}s")
 
 # IPFE (DDH)
 key = FeDDH.generate(m)                     # Master key
@@ -100,5 +98,10 @@ for i in range(N):
     ipfe_scores.append(m_ipfe)
 ranking_ipfe = np.argsort(-np.array(ipfe_scores))
 ipfe_time = time.time() - start
-print(f"IPFE top offer: {ranking_ipfe[0]}, time: {ipfe_time:.4f}s")
+
+
+print(f"--> Number of offers: {N}, Number of QoS metrics: {m}")
+print(f"--> Plaintext top offer: {top_plain}, time: {plain_time:.4f}s")
+print(f"--> IPFE top offer: {ranking_ipfe[0]}, time: {ipfe_time:.4f}s")
+print(f"--> Top offer[{top_plain}] = {{reliability={data['reliability'][top_plain]}, energy={data['energy'][top_plain]}, bandwidth={data['bandwidth'][top_plain]}, latency={data['latency'][top_plain]}, price={data['price'][top_plain]}}}")
 
