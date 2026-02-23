@@ -145,12 +145,12 @@ To achieve this:
 - For higher-is-better:
 
 $$
-r_j = \text{argsort\_with\_ties}(v_j)
+r_j = \texttt{argsort\_with\_ties}(v_j)
 $$
 - For lower-is-better:
 
 $$
-r_j = \text{argsort\_with\_ties}(-v_j)
+r_j = \texttt{argsort\_with\_ties}(-v_j)
 $$
 
 The script constructs an integer rank matrix $X \in \mathbb{Z}^{N \times m}$:
