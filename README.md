@@ -82,7 +82,7 @@ This file must define:
 Here:
 
 - $N$ = number of offers (resources),
-- $m = \text{len(qos\_priority)}$ = number of QoS objectives.
+- $ m= \text{len(qos\_priority)} $ = number of QoS objectives.
 
 The script loads and normalizes the data as follows:
 
