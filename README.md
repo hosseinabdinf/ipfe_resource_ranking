@@ -81,8 +81,8 @@ This file must define:
 
 Here:
 
-- $N$ = number of offers (resources),
-- $ m= \text{len(qos\_priority)} $ = number of QoS objectives.
+- $N$: number of offers (resources),
+- `m=len(qos_priority)`, that is equal to the number of QoS objectives.
 
 The script loads and normalizes the data as follows:
 
@@ -123,6 +123,7 @@ Conceptually, for values $v \in \mathbb{R}^N$:
 $$
 \text{idx} = \text{argsort}(v)
 $$
+
 2. Work over $v[\text{idx}]$; for a tie block at sorted positions $k, \dots, \ell$:
     - All elements in that block get rank $\ell + 1$.
 
@@ -145,12 +146,12 @@ To achieve this:
 - For higher-is-better:
 
 $$
-r_j = \texttt{argsort\_with\_ties}(v_j)
+r_j = \texttt{argsort_with_ties}(v_j)
 $$
 - For lower-is-better:
 
 $$
-r_j = \texttt{argsort\_with\_ties}(-v_j)
+r_j = \texttt{argsort_with_ties}(-v_j)
 $$
 
 The script constructs an integer rank matrix $X \in \mathbb{Z}^{N \times m}$:
