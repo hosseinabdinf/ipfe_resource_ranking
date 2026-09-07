@@ -149,6 +149,119 @@ The upper endpoint includes the maximum score even where the library treats it a
 
 Tests cover the legacy dataset, 1/5/6/7/12 metrics, mixed directions, reordered configurations, ties, invalid inputs, wrong batch/key/dimension metadata, zero weights, overflow, slices with scores above 50,000, and the CLI.
 
+## Mathematical description
+
+This section gives the ranking model in compact mathematical form. Let:
+
+- `N` be number of offers;
+- `m` be number of configured QoS metrics;
+- `v_{ij}` be raw value of metric `j` for offer `i`;
+- `w_j` be configured weight for metric `j`;
+- `d_j` be its direction: `max` or `min`.
+
+### 1. Rank each metric
+
+For one metric, stably sort its values. A tie group receives the group's maximum sorted position. For example:
+
+```text
+[10, 20, 20, 30]  becomes  [1, 3, 3, 4]
+```
+
+For a metric where larger values are preferred, define:
+
+```text
+r_{ij} = rank(v_{1j}, ..., v_{Nj})_i
+```
+
+For a metric where smaller values are preferred, reverse the order before ranking:
+
+```text
+r_{ij} = rank(-v_{1j}, ..., -v_{Nj})_i
+```
+
+Thus every rank satisfies `1 ≤ r_{ij} ≤ N`, and equal raw values get equal ranks.
+
+Collecting all ranks gives the integer matrix:
+
+```text
+X = [r_{ij}] ∈ Z^(N×m)
+```
+
+Row `X_i` is the rank vector for offer `i`. Metric order comes from insertion order in `qos_priority`; the same order is used for directions, weights, encryption, and decryption.
+
+### 2. Convert weights to integers
+
+IPFE evaluates integer vectors, so each configured weight is scaled and rounded:
+
+```text
+w'_j = round(scale · w_j)
+```
+
+The default `scale` is `10`. The scaled weight vector is:
+
+```text
+w' = (w'_1, ..., w'_m)
+```
+
+Weights must be finite and nonnegative. Rounding can turn a very small weight into zero. The wrapper does not normalize weights; multiplying all weights by the same positive factor preserves score ordering.
+
+### 3. Plaintext score and ranking
+
+The score for offer `i` is the weighted inner product:
+
+```text
+S_i = X_i · w'
+    = Σ(j=1..m) X_{ij} w'_j
+```
+
+In matrix form:
+
+```text
+S = X w'
+```
+
+Offers are ordered by descending `S_i`. NumPy's stable input order determines the order of equal final scores.
+
+### 4. IPFE evaluation
+
+The wrapper creates an IPFE key for exactly `m` dimensions:
+
+```text
+key = FeDDH.generate(m)
+sk  = FeDDH.keygen(w', key)
+```
+
+For each rank vector `X_i`, it creates a ciphertext:
+
+```text
+c_i = FeDDH.encrypt(X_i, key)
+```
+
+Decrypting with the functional key reveals only the requested inner product:
+
+```text
+FeDDH.decrypt(c_i, key.get_public_key(), sk) = X_i · w' = S_i
+```
+
+Therefore plaintext and IPFE produce the same integer score and the same ranking, provided they use the same offer set, metric order, directions, scaled weights, key, and ciphertext batch.
+
+### 5. Decryption bound
+
+Because `1 ≤ X_{ij} ≤ N` and weights are nonnegative:
+
+```text
+0 ≤ S_i ≤ S_max
+S_max = N · Σ(j=1..m) w'_j
+```
+
+The wrapper gives the IPFE library the search interval:
+
+```text
+(0, S_max + 1)
+```
+
+`EncryptedBatch` stores the original `N` and `S_max`, so decrypting a slice still uses the bound for the original offer set. This matters because a slice contains fewer ciphertexts but its individual scores can still be as large as the original maximum. The wrapper rejects signed 64-bit overflow before scoring or encryption.
+
 ## References
 
 - [pymife package](https://pypi.org/project/pymife/)
