@@ -1,0 +1,27 @@
+{
+  "qos_priority": {
+    "reliability": 0.2,
+    "energy": 0.1,
+    "bandwidth": 0.2,
+    "latency": 0.1,
+    "price": 0.2,
+    "cpu": 0.1,
+    "memory": 0.1
+  },
+  "qos_direction": {
+    "reliability": "max",
+    "energy": "min",
+    "bandwidth": "max",
+    "latency": "min",
+    "price": "min",
+    "cpu": "max",
+    "memory": "max"
+  },
+  "reliability": [0.99, 0.999, 0.98],
+  "energy": [100, 150, 80],
+  "bandwidth": [1000, 2000, 500],
+  "latency": [20, 10, 40],
+  "price": [0.1, 0.2, 0.05],
+  "cpu": [4, 8, 2],
+  "memory": [16, 32, 8]
+}
